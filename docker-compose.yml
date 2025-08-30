@@ -1,46 +1,67 @@
-version: '3'
+version: "3.8"
+
 services:
   app:
     container_name: pretix_app
     build:
-      dockerfile: Dockerfile
       context: ./docker/pretix
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - database
       - cache
+    environment:
+      PRETIX_CONFIG_FILE: /etc/pretix/pretix.cfg
     volumes:
       - pretix_data:/data
-      - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg
-      - ./docker/pretix/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/pretix/crontab:/tmp/crontab
+      # ⬇️ Make sure this is a REAL FILE in your repo (not a dir)
+      - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
+      # ⬇️ Mount the whole nginx directory (avoids "not a directory" error)
+      - ./docker/pretix/nginx:/etc/nginx:ro
+      # keep your crontab as you had it; set to :ro
+      - ./docker/pretix/crontab:/tmp/crontab:ro
     ports:
       - "80:80"
       - "443:443"
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ || curl -sf http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
 
   database:
     image: postgres:17-alpine3.22
     container_name: database
-    ports:
-      - "5432:5432"
+    restart: always
     environment:
-      - POSTGRES_USER=pretix
-      - POSTGRES_PASSWORD=pretix
+      POSTGRES_USER: pretix
+      POSTGRES_PASSWORD: pretix
+      POSTGRES_DB: pretix
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
+    # no public port needed; app connects via network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pretix -d pretix || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   cache:
     image: redis:alpine3.22
     container_name: redis
-    ports:
-      - "6379:6379"
     restart: always
     networks:
       - backend
+    # no public port needed; app connects via network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:
