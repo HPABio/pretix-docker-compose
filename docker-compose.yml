@@ -2,46 +2,59 @@ version: '3.8'
 
 services:
   app:
-    container_name: pretix_app
     build:
-      context: ./docker/pretix   # Adjust as needed
+      context: ./docker/pretix
       dockerfile: Dockerfile
     restart: always
     depends_on:
       - database
       - cache
+    environment:
+      - PRETIX_CONFIG_FILE=/etc/pretix/pretix.cfg
     volumes:
       - pretix_data:/data
-      - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg
-      - ./docker/pretix/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/pretix/crontab:/tmp/crontab.d
+      - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
+      - ./docker/pretix/crontab:/tmp/crontab.d:ro
+    expose:
+      - "8000"
     networks:
-      - backend         # internal services network
-      - coolify         # Traefik-accessible network
+      - backend
+      - coolify
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
       - "traefik.http.routers.pretix.rule=Host(`pretix.weinerlebnistouren-heyl.de`)"
       - "traefik.http.routers.pretix.entrypoints=https"
       - "traefik.http.routers.pretix.tls.certresolver=letsencrypt"
-      - "traefik.http.services.pretix.loadbalancer.server.port=80"
+      - "traefik.http.services.pretix.loadbalancer.server.port=8000"
 
   database:
     image: postgres:17-alpine3.22
-    container_name: pretix_database
+    restart: always
     environment:
       - POSTGRES_USER=pretix
       - POSTGRES_PASSWORD=pretix
+      - POSTGRES_DB=pretix
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pretix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cache:
     image: redis:alpine3.22
-    container_name: pretix_redis
     restart: always
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
@@ -52,3 +65,4 @@ networks:
     driver: bridge
   coolify:
     external: true
+    # name: coolify-network  # uncomment & set if your Traefik network has a different name
