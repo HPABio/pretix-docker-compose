@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: pretix_app
     build:
       context: ./docker/pretix
       dockerfile: Dockerfile
@@ -23,13 +24,14 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=coolify"
-      - "traefik.http.routers.pretix.rule=Host(`pretix.weinerlebnistouren-heyl.de`)"
+      - "traefik.http.routers.pretix.rule=Host(`${SERVICE_FQDN_APP:-pretix.weinerlebnistouren-heyl.de}`)"
       - "traefik.http.routers.pretix.entrypoints=https"
       - "traefik.http.routers.pretix.tls.certresolver=letsencrypt"
       - "traefik.http.services.pretix.loadbalancer.server.port=8000"
 
   database:
     image: postgres:17-alpine3.22
+    container_name: pretix_database
     restart: always
     environment:
       - POSTGRES_USER=pretix
@@ -47,6 +49,7 @@ services:
 
   cache:
     image: redis:alpine3.22
+    container_name: pretix_redis
     restart: always
     networks:
       - backend
@@ -65,4 +68,5 @@ networks:
     driver: bridge
   coolify:
     external: true
-    # name: coolify-network  # uncomment & set if your Traefik network has a different name
+    # If your Traefik network has a specific name, set it explicitly:
+    # name: coolify-network
