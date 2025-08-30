@@ -14,7 +14,7 @@ services:
       - pretix_data:/data
       - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg
       - ./docker/pretix/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/pretix/crontab:/tmp/crontab
+      - ./docker/pretix/crontab:/tmp/crontab:ro
     networks:
       - backend         # internal services network
       - coolify         # Traefik-accessible network
