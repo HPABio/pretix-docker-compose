@@ -1,8 +1,7 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
-    container_name: pretix_app
     build:
       context: ./docker/pretix
       dockerfile: Dockerfile
@@ -11,10 +10,10 @@ services:
       - database
       - cache
     environment:
-      - PRETIX_CONFIG_FILE=/etc/pretix/pretix.cfg
+      PRETIX_CONFIG_FILE: /etc/pretix/pretix.production.cfg
     volumes:
       - pretix_data:/data
-      - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
+      - ./docker/pretix/pretix.production.cfg:/etc/pretix/pretix.production.cfg:ro
       - ./docker/pretix/crontab:/tmp/crontab.d:ro
     expose:
       - "8000"
@@ -31,25 +30,23 @@ services:
 
   database:
     image: postgres:17-alpine3.22
-    container_name: pretix_database
     restart: always
     environment:
-      - POSTGRES_USER=pretix
-      - POSTGRES_PASSWORD=pretix
-      - POSTGRES_DB=pretix
+      POSTGRES_USER: pretix
+      POSTGRES_PASSWORD: pretix
+      POSTGRES_DB: pretix
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pretix"]
+      test: ["CMD-SHELL", "pg_isready -U pretix || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   cache:
     image: redis:alpine3.22
-    container_name: pretix_redis
     restart: always
     networks:
       - backend
@@ -68,5 +65,4 @@ networks:
     driver: bridge
   coolify:
     external: true
-    # If your Traefik network has a specific name, set it explicitly:
-    # name: coolify-network
+    # name: coolify-network  # uncomment & set if your Traefik network has a different name
