@@ -1,4 +1,4 @@
-version: "3.8"
+# docker-compose.yml  (Compose v2+ — no version key needed)
 
 services:
   app:
@@ -14,22 +14,25 @@ services:
       PRETIX_CONFIG_FILE: /etc/pretix/pretix.cfg
     volumes:
       - pretix_data:/data
-      # ⬇️ Make sure this is a REAL FILE in your repo (not a dir)
+      # ⬇️ MUST be a real file in your repo
       - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
-      # ⬇️ Mount the whole nginx directory (avoids "not a directory" error)
+      # ⬇️ Mount the whole nginx dir (avoids "not a directory" error)
       - ./docker/pretix/nginx:/etc/nginx:ro
-      # keep your crontab as you had it; set to :ro
+      # keep your crontab
       - ./docker/pretix/crontab:/tmp/crontab:ro
-    ports:
-      - "80:80"
-      - "443:443"
+    # no host ports here; Traefik will route
     networks:
       - backend
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ || curl -sf http://127.0.0.1/ || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      - coolify
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      # use your domain or SERVICE_FQDN_APP if you have it in env
+      - traefik.http.routers.pretix.rule=Host(`pretix.weinerlebnistouren-heyl.de`)
+      - traefik.http.routers.pretix.entrypoints=https
+      - traefik.http.routers.pretix.tls.certresolver=letsencrypt
+      # If nginx in the container listens on 80 (typical), keep 80 here:
+      - traefik.http.services.pretix.loadbalancer.server.port=80
 
   database:
     image: postgres:17-alpine3.22
@@ -42,35 +45,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - backend
-    # no public port needed; app connects via network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pretix -d pretix || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      backend:
+        aliases: [database]    # explicit, for clarity
 
   cache:
     image: redis:alpine3.22
     container_name: redis
     restart: always
     networks:
-      - backend
-    # no public port needed; app connects via network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      backend:
+        aliases: [redis, cache]  # allow both names to resolve
 
 volumes:
   postgres_data:
-    driver: local
   pretix_data:
-    driver: local
 
 networks:
   backend:
     driver: bridge
     driver_opts:
       com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"
+  coolify:
+    external: true
