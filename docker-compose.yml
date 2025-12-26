@@ -12,7 +12,7 @@ services:
       - cache
     environment:
       PRETIX_CONFIG_FILE: /etc/pretix/pretix.cfg
-      SERVICE_FQDN_APP=pretix.weinerlebnistouren-pfalz.de
+      SERVICE_FQDN_APP: 'pretix.weinerlebnistouren-pfalz.de'
       # Pretix instance configuration
       PRETIX_PRETIX_INSTANCE_NAME: ${PRETIX_INSTANCE_NAME:-Pretix}
       PRETIX_PRETIX_URL: https://${PRETIX_DOMAIN:-pretix.weinerlebnistouren-pfalz.de}
