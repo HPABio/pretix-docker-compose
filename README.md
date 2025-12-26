@@ -1,9 +1,49 @@
 # Pretix Docker-Compose setup
-The repository includes a [Pretix](https://pretix.eu/about/de/) docker-compose configuration for local development.
+The repository includes a [Pretix](https://pretix.eu/about/de/) docker-compose configuration for local development and production deployment via Coolify.
 
-## Usage
+## Coolify Deployment
+
+This repository is configured for easy deployment on Coolify. Follow these steps:
+
+### 1. Prerequisites
+- Ensure your DNS A record is configured:
+  - `pretix.weinerlebnistouren-pfalz.de` → `31.97.39.187`
+- Have a Coolify instance with the `coolify` network available
+- Have an SMTP server for sending emails
+
+### 2. Deployment Steps
+
+1. **Add the repository in Coolify**:
+   - Go to your Coolify dashboard
+   - Create a new resource → Docker Compose
+   - Paste the GitHub repository URL
+
+2. **Configure environment variables** in Coolify:
+
+   **Required variables:**
+   - `PRETIX_DOMAIN` = `pretix.weinerlebnistouren-pfalz.de`
+   - `POSTGRES_PASSWORD` = (generate a strong random password)
+   - `MAIL_FROM` = `noreply@weinerlebnistouren-pfalz.de`
+   - `MAIL_HOST` = (your SMTP server hostname)
+
+   **Optional variables** (see `.env.example` for full list):
+   - `MAIL_USER` = (SMTP username if required)
+   - `MAIL_PASSWORD` = (SMTP password if required)
+   - `PRETIX_INSTANCE_NAME` = Custom instance name
+   - `PRETIX_CURRENCY` = EUR (default)
+   - `PRETIX_LOCALE` = de (default)
+
+3. **Deploy**: Coolify will handle SSL certificates via Let's Encrypt and Traefik automatically.
+
+### 3. Initial Setup
+
+After the first deployment, access your Pretix instance at `https://pretix.weinerlebnistouren-pfalz.de` and complete the setup wizard.
+
+## Local Development
 
 You can execute `docker-compose up -d --build --force-recreate` to start and build all related containers.
+
+For local development, copy `.env.example` to `.env` and configure your local environment variables.
 
 ### Version information
 
