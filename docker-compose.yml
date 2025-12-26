@@ -53,8 +53,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      # use your domain or SERVICE_FQDN_APP if you have it in env
-      - traefik.http.routers.pretix.rule=Host(`${PRETIX_DOMAIN:-pretix.weinerlebnistouren-pfalz.de}`)
+      # Hard-coded domain for Coolify (env vars don't work in Traefik labels)
+      - traefik.http.routers.pretix.rule=Host(`pretix.weinerlebnistouren-pfalz.de`)
       - traefik.http.routers.pretix.entrypoints=https
       - traefik.http.routers.pretix.tls.certresolver=letsencrypt
       # If nginx in the container listens on 80 (typical), keep 80 here:
