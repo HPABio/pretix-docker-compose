@@ -44,8 +44,8 @@ services:
       - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
       # ⬇️ Mount the whole nginx dir (avoids "not a directory" error)
       - ./docker/pretix/nginx:/etc/nginx:ro
-      # keep your crontab
-      - ./docker/pretix/crontab:/tmp/crontab:ro
+      # Note: crontab is copied into the image during build (see Dockerfile line 9)
+      # No need to mount it here as it would conflict with the built-in copy
     # no host ports here; Traefik will route
     networks:
       - backend
