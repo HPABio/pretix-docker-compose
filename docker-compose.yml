@@ -14,7 +14,7 @@ services:
       PRETIX_CONFIG_FILE: /etc/pretix/pretix.cfg
       # Pretix instance configuration
       PRETIX_PRETIX_INSTANCE_NAME: ${PRETIX_INSTANCE_NAME:-Pretix}
-      PRETIX_PRETIX_URL: https://${PRETIX_DOMAIN:-www.pretix.weinerlebnistouren-pfalz.de}
+      PRETIX_PRETIX_URL: https://${PRETIX_DOMAIN:-pretix.weinerlebnistouren-pfalz.de}
       PRETIX_PRETIX_CURRENCY: ${PRETIX_CURRENCY:-EUR}
       # Database configuration
       PRETIX_DATABASE_BACKEND: postgresql
