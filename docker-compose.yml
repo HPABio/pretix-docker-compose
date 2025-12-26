@@ -14,7 +14,7 @@ services:
       PRETIX_CONFIG_FILE: /etc/pretix/pretix.cfg
       # Pretix instance configuration
       PRETIX_PRETIX_INSTANCE_NAME: ${PRETIX_INSTANCE_NAME:-Pretix}
-      PRETIX_PRETIX_URL: https://${PRETIX_DOMAIN:-pretix.weinerlebnistouren-pfalz.de}
+      PRETIX_PRETIX_URL: https://${PRETIX_DOMAIN:-www.pretix.weinerlebnistouren-pfalz.de}
       PRETIX_PRETIX_CURRENCY: ${PRETIX_CURRENCY:-EUR}
       # Database configuration
       PRETIX_DATABASE_BACKEND: postgresql
@@ -53,12 +53,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=coolify
-      # Hard-coded domain for Coolify (env vars don't work in Traefik labels)
-      - traefik.http.routers.pretix.rule=Host(`pretix.weinerlebnistouren-pfalz.de`)
-      - traefik.http.routers.pretix.entrypoints=https
-      - traefik.http.routers.pretix.tls.certresolver=letsencrypt
-      # If nginx in the container listens on 80 (typical), keep 80 here:
-      - traefik.http.services.pretix.loadbalancer.server.port=80
 
   database:
     image: postgres:17-alpine3.22
