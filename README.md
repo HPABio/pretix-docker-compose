@@ -9,7 +9,9 @@ This repository is configured for easy deployment on Coolify. Follow these steps
 - Ensure your DNS A record is configured:
   - `pretix.weinerlebnistouren-pfalz.de` → `31.97.39.187`
 - Have a Coolify instance with the `coolify` network available
-- Have an SMTP server for sending emails
+- Have a Gmail account with an App Password for sending emails
+  - **Important**: Create a Gmail App Password at [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+  - Regular Gmail passwords will NOT work due to security restrictions
 
 ### 2. Deployment Steps
 
@@ -24,11 +26,11 @@ This repository is configured for easy deployment on Coolify. Follow these steps
    - `PRETIX_DOMAIN` = `pretix.weinerlebnistouren-pfalz.de`
    - `POSTGRES_PASSWORD` = (generate a strong random password)
    - `MAIL_FROM` = `noreply@weinerlebnistouren-pfalz.de`
-   - `MAIL_HOST` = (your SMTP server hostname)
+   - `MAIL_HOST` = `smtp.gmail.com`
+   - `MAIL_USER` = `your-email@gmail.com` (your Gmail address)
+   - `MAIL_PASSWORD` = (your Gmail App Password - NOT your regular Gmail password)
 
    **Optional variables** (see `.env.example` for full list):
-   - `MAIL_USER` = (SMTP username if required)
-   - `MAIL_PASSWORD` = (SMTP password if required)
    - `PRETIX_INSTANCE_NAME` = Custom instance name
    - `PRETIX_CURRENCY` = EUR (default)
    - `PRETIX_LOCALE` = de (default)
