@@ -42,10 +42,8 @@ services:
       - pretix_data:/data
       # ⬇️ MUST be a real file in your repo
       - ./docker/pretix/pretix.cfg:/etc/pretix/pretix.cfg:ro
-      # ⬇️ Mount the whole nginx dir (avoids "not a directory" error)
-      - ./docker/pretix/nginx:/etc/nginx:ro
+      # Note: nginx config is provided by the base image (pretix/standalone:stable)
       # Note: crontab is copied into the image during build (see Dockerfile line 9)
-      # No need to mount it here as it would conflict with the built-in copy
     # no host ports here; Traefik will route
     networks:
       - backend
